@@ -13,6 +13,7 @@ import (
 const (
 	contextPackage = protogen.GoImportPath("context")
 	asynqPackage   = protogen.GoImportPath("github.com/hibiken/asynq")
+	asynqxPackage  = protogen.GoImportPath("github.com/amzapi/protoc-gen-go-asynq/asynqx")
 	emptyPackage   = protogen.GoImportPath("google.golang.org/protobuf/types/known/emptypb")
 	protoPackage   = protogen.GoImportPath("google.golang.org/protobuf/proto")
 )
@@ -47,6 +48,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("var _ = new(", asynqPackage.Ident("Task"), ")")
 	g.P("var _ = new(", emptyPackage.Ident("Empty"), ")")
 	g.P("var _ = new(", protoPackage.Ident("Message"), ")")
+	g.P("var _ = new(", asynqxPackage.Ident("Server"), ")")
 	g.P()
 
 	for _, service := range file.Services {

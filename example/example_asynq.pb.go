@@ -6,6 +6,7 @@ package example
 
 import (
 	context "context"
+	asynqx "github.com/amzapi/protoc-gen-go-asynq/asynqx"
 	asynq "github.com/hibiken/asynq"
 	proto "google.golang.org/protobuf/proto"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -17,18 +18,19 @@ var _ = new(context.Context)
 var _ = new(asynq.Task)
 var _ = new(emptypb.Empty)
 var _ = new(proto.Message)
+var _ = new(asynqx.Server)
 
-type UserJobServer interface {
+type UserTaskServer interface {
 	CreateUser(context.Context, *CreateUserPayload) error
 	UpdateUser(context.Context, *UpdateUserPayload) error
 }
 
-func RegisterUserJobServer(mux *asynq.ServeMux, srv UserJobServer) {
-	mux.HandleFunc("user:create", _User_CreateUser_Job_Handler(srv))
-	mux.HandleFunc("user:update", _User_UpdateUser_Job_Handler(srv))
+func RegisterUserTaskServer(s *asynqx.Server, srv UserTaskServer) {
+	s.HandleFunc("user:create", _User_CreateUser_Task_Handler(srv))
+	s.HandleFunc("user:update", _User_UpdateUser_Task_Handler(srv))
 }
 
-func _User_CreateUser_Job_Handler(srv UserJobServer) func(context.Context, *asynq.Task) error {
+func _User_CreateUser_Task_Handler(srv UserTaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in CreateUserPayload
 		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
@@ -39,7 +41,7 @@ func _User_CreateUser_Job_Handler(srv UserJobServer) func(context.Context, *asyn
 	}
 }
 
-func _User_UpdateUser_Job_Handler(srv UserJobServer) func(context.Context, *asynq.Task) error {
+func _User_UpdateUser_Task_Handler(srv UserTaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in UpdateUserPayload
 		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
@@ -50,11 +52,11 @@ func _User_UpdateUser_Job_Handler(srv UserJobServer) func(context.Context, *asyn
 	}
 }
 
-type UserSvcJob struct{}
+type UserSvcTask struct{}
 
-var UserJob UserSvcJob
+var UserTask UserSvcTask
 
-func (j *UserSvcJob) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*asynq.Task, error) {
+func (j *UserSvcTask) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*asynq.Task, error) {
 	payload, err := proto.Marshal(in)
 	if err != nil {
 		return nil, err
@@ -63,7 +65,7 @@ func (j *UserSvcJob) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*a
 	return task, nil
 }
 
-func (j *UserSvcJob) UpdateUser(in *UpdateUserPayload, opts ...asynq.Option) (*asynq.Task, error) {
+func (j *UserSvcTask) UpdateUser(in *UpdateUserPayload, opts ...asynq.Option) (*asynq.Task, error) {
 	payload, err := proto.Marshal(in)
 	if err != nil {
 		return nil, err
@@ -72,21 +74,21 @@ func (j *UserSvcJob) UpdateUser(in *UpdateUserPayload, opts ...asynq.Option) (*a
 	return task, nil
 }
 
-type UserJobClient interface {
+type UserTaskClient interface {
 	CreateUser(ctx context.Context, req *CreateUserPayload, opts ...asynq.Option) (info *asynq.TaskInfo, err error)
 	UpdateUser(ctx context.Context, req *UpdateUserPayload, opts ...asynq.Option) (info *asynq.TaskInfo, err error)
 }
 
-type UserJobClientImpl struct {
+type UserTaskClientImpl struct {
 	cc *asynq.Client
 }
 
-func NewUserJobClient(client *asynq.Client) UserJobClient {
-	return &UserJobClientImpl{client}
+func NewUserTaskClient(client *asynq.Client) UserTaskClient {
+	return &UserTaskClientImpl{client}
 }
 
-func (c *UserJobClientImpl) CreateUser(ctx context.Context, in *CreateUserPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
-	task, err := UserJob.CreateUser(in, opts...)
+func (c *UserTaskClientImpl) CreateUser(ctx context.Context, in *CreateUserPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	task, err := UserTask.CreateUser(in, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,8 +99,8 @@ func (c *UserJobClientImpl) CreateUser(ctx context.Context, in *CreateUserPayloa
 	return info, nil
 }
 
-func (c *UserJobClientImpl) UpdateUser(ctx context.Context, in *UpdateUserPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
-	task, err := UserJob.UpdateUser(in, opts...)
+func (c *UserTaskClientImpl) UpdateUser(ctx context.Context, in *UpdateUserPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	task, err := UserTask.UpdateUser(in, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -9,20 +9,20 @@ import (
 var asynqTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
-type {{.ServiceType}}JobServer interface {
+type {{.ServiceType}}TaskServer interface {
 {{- range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (error)
 {{- end}}
 }
 
-func Register{{.ServiceType}}JobServer(mux *asynq.ServeMux, srv {{.ServiceType}}JobServer) {
+func Register{{.ServiceType}}TaskServer(s *asynqx.Server, srv {{.ServiceType}}TaskServer) {
 	{{- range .Methods}}
-	mux.HandleFunc("{{.Typename}}", _{{$svrType}}_{{.Name}}_Job_Handler(srv))
+	s.HandleFunc("{{.Typename}}", _{{$svrType}}_{{.Name}}_Task_Handler(srv))
 	{{- end}}
 }
 
 {{range .Methods}}
-func _{{$svrType}}_{{.Name}}_Job_Handler(srv {{$svrType}}JobServer) func(context.Context, *asynq.Task) error {
+func _{{$svrType}}_{{.Name}}_Task_Handler(srv {{$svrType}}TaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in {{.Request}}
 		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
@@ -34,11 +34,11 @@ func _{{$svrType}}_{{.Name}}_Job_Handler(srv {{$svrType}}JobServer) func(context
 }
 {{end}}
 
-type {{.ServiceType}}SvcJob struct {}
-var {{.ServiceType}}Job {{.ServiceType}}SvcJob
+type {{.ServiceType}}SvcTask struct {}
+var {{.ServiceType}}Task {{.ServiceType}}SvcTask
 
 {{range .MethodSets}}
-func (j *{{$svrType}}SvcJob) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) (*asynq.Task, error) {
+func (j *{{$svrType}}SvcTask) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) (*asynq.Task, error) {
 	payload, err := proto.Marshal(in)
 	if err != nil {
 		return nil, err
@@ -48,23 +48,23 @@ func (j *{{$svrType}}SvcJob) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) (
 }
 {{end}}
 
-type {{.ServiceType}}JobClient interface {
+type {{.ServiceType}}TaskClient interface {
 {{- range .MethodSets}}
 	{{.Name}}(ctx context.Context, req *{{.Request}}, opts ...asynq.Option) (info *asynq.TaskInfo, err error) 
 {{- end}}
 }
 
-type {{.ServiceType}}JobClientImpl struct{
+type {{.ServiceType}}TaskClientImpl struct{
 	cc *asynq.Client
 }
 	
-func New{{.ServiceType}}JobClient (client *asynq.Client) {{.ServiceType}}JobClient {
-	return &{{.ServiceType}}JobClientImpl{client}
+func New{{.ServiceType}}TaskClient (client *asynq.Client) {{.ServiceType}}TaskClient {
+	return &{{.ServiceType}}TaskClientImpl{client}
 }
 
 {{range .MethodSets}}
-func (c *{{$svrType}}JobClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...asynq.Option) (*asynq.TaskInfo, error) {
-	task, err := {{$svrType}}Job.{{.Name}}(in, opts...)
+func (c *{{$svrType}}TaskClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	task, err := {{$svrType}}Task.{{.Name}}(in, opts...)
 	if err != nil {
 		return nil, err
 	}
