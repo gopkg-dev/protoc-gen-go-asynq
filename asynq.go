@@ -73,7 +73,7 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 		}
 		rule, ok := proto.GetExtension(method.Desc.Options(), asynq.E_Task).(*asynq.Task)
 		if rule != nil && ok {
-			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, rule.Typename))
+			sd.Methods = append(sd.Methods, buildMethodDesc(g, method, rule))
 		}
 	}
 	if len(sd.Methods) != 0 {
@@ -96,13 +96,17 @@ func hasAsynqRule(services []*protogen.Service) bool {
 	return false
 }
 
-func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, t string) *methodDesc {
+func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, rule *asynq.Task) *methodDesc {
 	return &methodDesc{
-		Name:     m.GoName,
-		Num:      methodSets[m.GoName],
-		Request:  g.QualifiedGoIdent(m.Input.GoIdent),
-		Reply:    g.QualifiedGoIdent(m.Output.GoIdent),
-		Typename: t,
+		Name:      m.GoName,
+		Num:       methodSets[m.GoName],
+		Request:   g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:     g.QualifiedGoIdent(m.Output.GoIdent),
+		Typename:  rule.Typename,
+		TimeOut:   rule.Timeout,
+		MaxRetry:  rule.MaxRetry,
+		Retention: rule.Retention,
+		Unique:    rule.Unique,
 	}
 }
 

@@ -5,19 +5,27 @@ package example;
 import "asynq/asynq.proto";
 import "google/protobuf/empty.proto";
 
-option go_package = ".;example";
+option go_package          = ".;example";
 option java_multiple_files = true;
-option java_package = "example";
+option java_package        = "example";
 
 service User {
     rpc CreateUser(CreateUserPayload) returns (google.protobuf.Empty) {
         option (asynq.task) = {
             typename: "user:create"
+            timeout: 30
+            max_retry: 10
+            retention: 60
+            unique: 3600
         };
     };
     rpc UpdateUser(UpdateUserPayload) returns (google.protobuf.Empty) {
         option (asynq.task) = {
             typename: "user:update"
+            timeout: 60
+            max_retry: 10
+            retention: 60
+            unique: 3600
         };
     };
 }

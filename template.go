@@ -9,6 +9,9 @@ import (
 var asynqTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
+
+const QueueName = "{{lower $svrType}}"
+
 type {{.ServiceType}}TaskServer interface {
 {{- range .MethodSets}}
 	{{.Name}}(context.Context, *{{.Request}}) (error)
@@ -43,9 +46,13 @@ func (j *{{$svrType}}SvcTask) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) 
 	if err != nil {
 		return nil, err
 	}
+{{if .TimeOut }}opts = append(opts, asynq.Timeout({{.TimeOut}}* time.Second)){{end}}
+{{if .MaxRetry }}opts = append(opts, asynq.MaxRetry({{.MaxRetry}})){{end}}
+{{if .Retention }}opts = append(opts, asynq.Timeout({{.Retention}}* time.Second)){{end}}
+{{if .Unique }}opts = append(opts, asynq.Timeout({{.Unique}}* time.Second)){{end}}
 	task := asynq.NewTask("{{.Typename}}", payload, opts...)
-	return task, nil
-}
+		return task, nil
+	}
 {{end}}
 
 type {{.ServiceType}}TaskClient interface {
@@ -92,7 +99,11 @@ type methodDesc struct {
 	Request string
 	Reply   string
 	// asynq rule
-	Typename string
+	Typename  string
+	TimeOut   int32
+	MaxRetry  int32
+	Retention int32
+	Unique    int32
 }
 
 func (s *serviceDesc) execute() string {
@@ -101,7 +112,9 @@ func (s *serviceDesc) execute() string {
 		s.MethodSets[m.Name] = m
 	}
 	buf := new(bytes.Buffer)
-	tmpl, err := template.New("asynq").Parse(strings.TrimSpace(asynqTemplate))
+	tmpl, err := template.New("asynq").Funcs(map[string]interface{}{
+		"lower": strings.ToLower,
+	}).Parse(strings.TrimSpace(asynqTemplate))
 	if err != nil {
 		panic(err)
 	}
