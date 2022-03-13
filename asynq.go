@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	timePackage    = protogen.GoImportPath("time")
 	contextPackage = protogen.GoImportPath("context")
 	asynqPackage   = protogen.GoImportPath("github.com/hibiken/asynq")
 	asynqxPackage  = protogen.GoImportPath("github.com/amzapi/protoc-gen-go-asynq/asynqx")
@@ -44,6 +45,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	}
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the asynq package it is being compiled against.")
+	g.P("var _ = new(", timePackage.Ident("Time"), ")")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("var _ = new(", asynqPackage.Ident("Task"), ")")
 	g.P("var _ = new(", emptyPackage.Ident("Empty"), ")")
