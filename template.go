@@ -49,7 +49,7 @@ func (j *{{$svrType}}SvcTask) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) 
 {{if .TimeOut }}opts = append(opts, asynq.Timeout({{.TimeOut}}* time.Second)){{end}}
 {{if .MaxRetry }}opts = append(opts, asynq.MaxRetry({{.MaxRetry}})){{end}}
 {{if .Retention }}opts = append(opts, asynq.Timeout({{.Retention}}* time.Second)){{end}}
-{{if .Unique }}opts = append(opts, asynq.Timeout({{.Unique}}* time.Second)){{end}}
+{{if .Unique }}opts = append(opts, asynq.Unique({{.Unique}}* time.Second)){{end}}
 	task := asynq.NewTask("{{.Typename}}", payload, opts...)
 		return task, nil
 	}

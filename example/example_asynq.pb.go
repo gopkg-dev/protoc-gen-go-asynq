@@ -68,7 +68,7 @@ func (j *UserSvcTask) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*
 	opts = append(opts, asynq.Timeout(30*time.Second))
 	opts = append(opts, asynq.MaxRetry(10))
 	opts = append(opts, asynq.Timeout(60*time.Second))
-	opts = append(opts, asynq.Timeout(3600*time.Second))
+	opts = append(opts, asynq.Unique(3600*time.Second))
 	task := asynq.NewTask("user:create", payload, opts...)
 	return task, nil
 }
@@ -81,7 +81,7 @@ func (j *UserSvcTask) UpdateUser(in *UpdateUserPayload, opts ...asynq.Option) (*
 	opts = append(opts, asynq.Timeout(60*time.Second))
 	opts = append(opts, asynq.MaxRetry(10))
 	opts = append(opts, asynq.Timeout(60*time.Second))
-	opts = append(opts, asynq.Timeout(3600*time.Second))
+	opts = append(opts, asynq.Unique(3600*time.Second))
 	task := asynq.NewTask("user:update", payload, opts...)
 	return task, nil
 }
