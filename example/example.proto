@@ -37,3 +37,32 @@ message CreateUserPayload {
 message UpdateUserPayload {
     string name = 1;
 }
+
+service Book {
+    rpc CreateUser(CreateBookPayload) returns (google.protobuf.Empty) {
+        option (asynq.task) = {
+            typename: "book:create"
+            timeout: 30
+            max_retry: 10
+            retention: 60
+            unique: 3600
+        };
+    };
+    rpc UpdateUser(UpdateBookPayload) returns (google.protobuf.Empty) {
+        option (asynq.task) = {
+            typename: "book:update"
+            timeout: 60
+            max_retry: 10
+            retention: 60
+            unique: 3600
+        };
+    };
+}
+
+message CreateBookPayload {
+    string name = 1;
+}
+
+message UpdateBookPayload {
+    string name = 1;
+}

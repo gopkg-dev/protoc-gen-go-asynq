@@ -10,7 +10,7 @@ var asynqTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
 
-const QueueName = "{{lower $svrType}}"
+const {{.ServiceType}}QueueName = "{{lower $svrType}}"
 
 type {{.ServiceType}}TaskServer interface {
 {{- range .MethodSets}}
@@ -50,6 +50,7 @@ func (j *{{$svrType}}SvcTask) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) 
 {{if .MaxRetry }}opts = append(opts, asynq.MaxRetry({{.MaxRetry}})){{end}}
 {{if .Retention }}opts = append(opts, asynq.Timeout({{.Retention}}* time.Second)){{end}}
 {{if .Unique }}opts = append(opts, asynq.Unique({{.Unique}}* time.Second)){{end}}
+	opts = append(opts, asynq.Queue({{$svrType}}QueueName))
 	task := asynq.NewTask("{{.Typename}}", payload, opts...)
 		return task, nil
 	}

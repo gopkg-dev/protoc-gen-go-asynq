@@ -23,9 +23,8 @@ func TestServer(t *testing.T) {
 			// .......
 		}),
 		asynqx.Queues(map[string]int{
-			"critical": 6,
-			"default":  3,
-			"low":      1,
+			UserQueueName: 5,
+			BookQueueName: 5,
 		}),
 		asynqx.IsFailure(func(err error) bool {
 			return !IsRateLimitError(err)
