@@ -13,6 +13,7 @@ service User {
     rpc CreateUser(CreateUserPayload) returns (google.protobuf.Empty) {
         option (asynq.task) = {
             typename: "user:create"
+            payload_type: JSON
             timeout: 30
             max_retry: 10
             retention: 60
@@ -22,6 +23,7 @@ service User {
     rpc UpdateUser(UpdateUserPayload) returns (google.protobuf.Empty) {
         option (asynq.task) = {
             typename: "user:update"
+            payload_type: JSON
             timeout: 60
             max_retry: 10
             retention: 60
@@ -39,18 +41,20 @@ message UpdateUserPayload {
 }
 
 service Book {
-    rpc CreateUser(CreateBookPayload) returns (google.protobuf.Empty) {
+    rpc CreateBook(CreateBookPayload) returns (google.protobuf.Empty) {
         option (asynq.task) = {
             typename: "book:create"
+            payload_type: JSON
             timeout: 30
             max_retry: 10
             retention: 60
             unique: 3600
         };
     };
-    rpc UpdateUser(UpdateBookPayload) returns (google.protobuf.Empty) {
+    rpc UpdateBook(UpdateBookPayload) returns (google.protobuf.Empty) {
         option (asynq.task) = {
             typename: "book:update"
+            payload_type: JSON
             timeout: 60
             max_retry: 10
             retention: 60

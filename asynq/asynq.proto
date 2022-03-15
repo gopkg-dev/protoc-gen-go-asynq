@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package asynq;
 
@@ -9,12 +9,12 @@ option java_multiple_files = true;
 option java_package        = "com.github.asynq";
 
 extend google.protobuf.MethodOptions {
-    Task task = 567890;
+    optional Task task = 567890;
 }
 
 message Task {
     // typename indicates the type of task to be performed.
-    string typename = 1;
+    required string typename = 1;
     // specify how long a task may run.
     // If the timeout elapses before the Handler returns, then the task
     // will be retried.
@@ -23,16 +23,16 @@ message Task {
     //
     // If there's a conflicting Deadline option, whichever comes earliest
     // will be used.
-    int32 timeout = 2;
+    optional int32 timeout = 2;
     // specify the max number of times
     // the task will be retried.
     //
     // Negative retry count is treated as zero retry.
-    int32 max_retry = 3;
+    optional int32 max_retry = 3;
     // specify the duration of retention period for the task.
     // If this option is provided, the task will be stored as a completed task after successful processing.
     // A completed task will be deleted after the specified duration elapses.
-    int32 retention = 4;
+    optional int32 retention = 4;
     // unique option to enqueue a task only if the given task is unique.
     // Task enqueued with this option is guaranteed to be unique within the given ttl.
     // Once the task gets processed successfully or once the TTL has expired, another task with the same uniqueness may be enqueued.
@@ -43,5 +43,11 @@ message Task {
     //     - Task Type
     //     - Task Payload
     //     - Queue Name
-    int32 unique = 5;
+    optional int32 unique = 5;
+
+    enum PayloadType {
+        Protobuf = 0;
+        JSON     = 1;
+    }
+    optional PayloadType payload_type = 6 [default = Protobuf];
 }

@@ -6,6 +6,7 @@ package example
 
 import (
 	context "context"
+	json "encoding/json"
 	asynqx "github.com/amzapi/protoc-gen-go-asynq/asynqx"
 	asynq "github.com/hibiken/asynq"
 	proto "google.golang.org/protobuf/proto"
@@ -17,6 +18,7 @@ import (
 // is compatible with the asynq package it is being compiled against.
 var _ = new(time.Time)
 var _ = new(context.Context)
+var _ = new(json.RawMessage)
 var _ = new(asynq.Task)
 var _ = new(emptypb.Empty)
 var _ = new(proto.Message)
@@ -37,7 +39,7 @@ func RegisterUserTaskServer(s *asynqx.Server, srv UserTaskServer) {
 func _User_CreateUser_Task_Handler(srv UserTaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in CreateUserPayload
-		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
+		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
 		err := srv.CreateUser(ctx, &in)
@@ -48,7 +50,7 @@ func _User_CreateUser_Task_Handler(srv UserTaskServer) func(context.Context, *as
 func _User_UpdateUser_Task_Handler(srv UserTaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in UpdateUserPayload
-		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
+		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
 		err := srv.UpdateUser(ctx, &in)
@@ -61,7 +63,7 @@ type UserSvcTask struct{}
 var UserTask UserSvcTask
 
 func (j *UserSvcTask) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*asynq.Task, error) {
-	payload, err := proto.Marshal(in)
+	payload, err := json.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +77,7 @@ func (j *UserSvcTask) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*
 }
 
 func (j *UserSvcTask) UpdateUser(in *UpdateUserPayload, opts ...asynq.Option) (*asynq.Task, error) {
-	payload, err := proto.Marshal(in)
+	payload, err := json.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
@@ -128,33 +130,33 @@ func (c *UserTaskClientImpl) UpdateUser(ctx context.Context, in *UpdateUserPaylo
 const BookQueueName = "book"
 
 type BookTaskServer interface {
-	CreateUser(context.Context, *CreateBookPayload) error
-	UpdateUser(context.Context, *UpdateBookPayload) error
+	CreateBook(context.Context, *CreateBookPayload) error
+	UpdateBook(context.Context, *UpdateBookPayload) error
 }
 
 func RegisterBookTaskServer(s *asynqx.Server, srv BookTaskServer) {
-	s.HandleFunc("book:create", _Book_CreateUser_Task_Handler(srv))
-	s.HandleFunc("book:update", _Book_UpdateUser_Task_Handler(srv))
+	s.HandleFunc("book:create", _Book_CreateBook_Task_Handler(srv))
+	s.HandleFunc("book:update", _Book_UpdateBook_Task_Handler(srv))
 }
 
-func _Book_CreateUser_Task_Handler(srv BookTaskServer) func(context.Context, *asynq.Task) error {
+func _Book_CreateBook_Task_Handler(srv BookTaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in CreateBookPayload
-		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
+		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.CreateUser(ctx, &in)
+		err := srv.CreateBook(ctx, &in)
 		return err
 	}
 }
 
-func _Book_UpdateUser_Task_Handler(srv BookTaskServer) func(context.Context, *asynq.Task) error {
+func _Book_UpdateBook_Task_Handler(srv BookTaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in UpdateBookPayload
-		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
+		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.UpdateUser(ctx, &in)
+		err := srv.UpdateBook(ctx, &in)
 		return err
 	}
 }
@@ -163,8 +165,8 @@ type BookSvcTask struct{}
 
 var BookTask BookSvcTask
 
-func (j *BookSvcTask) CreateUser(in *CreateBookPayload, opts ...asynq.Option) (*asynq.Task, error) {
-	payload, err := proto.Marshal(in)
+func (j *BookSvcTask) CreateBook(in *CreateBookPayload, opts ...asynq.Option) (*asynq.Task, error) {
+	payload, err := json.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
@@ -177,8 +179,8 @@ func (j *BookSvcTask) CreateUser(in *CreateBookPayload, opts ...asynq.Option) (*
 	return task, nil
 }
 
-func (j *BookSvcTask) UpdateUser(in *UpdateBookPayload, opts ...asynq.Option) (*asynq.Task, error) {
-	payload, err := proto.Marshal(in)
+func (j *BookSvcTask) UpdateBook(in *UpdateBookPayload, opts ...asynq.Option) (*asynq.Task, error) {
+	payload, err := json.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
@@ -192,8 +194,8 @@ func (j *BookSvcTask) UpdateUser(in *UpdateBookPayload, opts ...asynq.Option) (*
 }
 
 type BookTaskClient interface {
-	CreateUser(ctx context.Context, req *CreateBookPayload, opts ...asynq.Option) (info *asynq.TaskInfo, err error)
-	UpdateUser(ctx context.Context, req *UpdateBookPayload, opts ...asynq.Option) (info *asynq.TaskInfo, err error)
+	CreateBook(ctx context.Context, req *CreateBookPayload, opts ...asynq.Option) (info *asynq.TaskInfo, err error)
+	UpdateBook(ctx context.Context, req *UpdateBookPayload, opts ...asynq.Option) (info *asynq.TaskInfo, err error)
 }
 
 type BookTaskClientImpl struct {
@@ -204,8 +206,8 @@ func NewBookTaskClient(client *asynq.Client) BookTaskClient {
 	return &BookTaskClientImpl{client}
 }
 
-func (c *BookTaskClientImpl) CreateUser(ctx context.Context, in *CreateBookPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
-	task, err := BookTask.CreateUser(in, opts...)
+func (c *BookTaskClientImpl) CreateBook(ctx context.Context, in *CreateBookPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	task, err := BookTask.CreateBook(in, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -216,8 +218,8 @@ func (c *BookTaskClientImpl) CreateUser(ctx context.Context, in *CreateBookPaylo
 	return info, nil
 }
 
-func (c *BookTaskClientImpl) UpdateUser(ctx context.Context, in *UpdateBookPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
-	task, err := BookTask.UpdateUser(in, opts...)
+func (c *BookTaskClientImpl) UpdateBook(ctx context.Context, in *UpdateBookPayload, opts ...asynq.Option) (*asynq.TaskInfo, error) {
+	task, err := BookTask.UpdateBook(in, opts...)
 	if err != nil {
 		return nil, err
 	}

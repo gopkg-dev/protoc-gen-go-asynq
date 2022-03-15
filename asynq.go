@@ -13,6 +13,7 @@ import (
 const (
 	timePackage    = protogen.GoImportPath("time")
 	contextPackage = protogen.GoImportPath("context")
+	jsonPackage    = protogen.GoImportPath("encoding/json")
 	asynqPackage   = protogen.GoImportPath("github.com/hibiken/asynq")
 	asynqxPackage  = protogen.GoImportPath("github.com/amzapi/protoc-gen-go-asynq/asynqx")
 	emptyPackage   = protogen.GoImportPath("google.golang.org/protobuf/types/known/emptypb")
@@ -47,6 +48,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// is compatible with the asynq package it is being compiled against.")
 	g.P("var _ = new(", timePackage.Ident("Time"), ")")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
+	g.P("var _ = new(", jsonPackage.Ident("RawMessage"), ")")
 	g.P("var _ = new(", asynqPackage.Ident("Task"), ")")
 	g.P("var _ = new(", emptyPackage.Ident("Empty"), ")")
 	g.P("var _ = new(", protoPackage.Ident("Message"), ")")
@@ -100,15 +102,16 @@ func hasAsynqRule(services []*protogen.Service) bool {
 
 func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, rule *asynq.Task) *methodDesc {
 	return &methodDesc{
-		Name:      m.GoName,
-		Num:       methodSets[m.GoName],
-		Request:   g.QualifiedGoIdent(m.Input.GoIdent),
-		Reply:     g.QualifiedGoIdent(m.Output.GoIdent),
-		Typename:  rule.Typename,
-		TimeOut:   rule.Timeout,
-		MaxRetry:  rule.MaxRetry,
-		Retention: rule.Retention,
-		Unique:    rule.Unique,
+		Name:        m.GoName,
+		Num:         methodSets[m.GoName],
+		Request:     g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:       g.QualifiedGoIdent(m.Output.GoIdent),
+		Typename:    rule.Typename,
+		TimeOut:     rule.Timeout,
+		MaxRetry:    rule.MaxRetry,
+		Retention:   rule.Retention,
+		Unique:      rule.Unique,
+		PayloadType: rule.PayloadType,
 	}
 }
 

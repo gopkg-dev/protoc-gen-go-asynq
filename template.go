@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"strings"
 	"text/template"
+
+	"github.com/amzapi/protoc-gen-go-asynq/asynq"
 )
 
 var asynqTemplate = `
@@ -28,7 +30,7 @@ func Register{{.ServiceType}}TaskServer(s *asynqx.Server, srv {{.ServiceType}}Ta
 func _{{$svrType}}_{{.Name}}_Task_Handler(srv {{$svrType}}TaskServer) func(context.Context, *asynq.Task) error {
 	return func(ctx context.Context, task *asynq.Task) error {
 		var in {{.Request}}
-		if err := proto.Unmarshal(task.Payload(), &in); err != nil {
+		if err := {{ .PayloadType | getPayloadType}}.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
 		err := srv.{{.Name}}(ctx, &in)
@@ -42,14 +44,22 @@ var {{.ServiceType}}Task {{.ServiceType}}SvcTask
 
 {{range .MethodSets}}
 func (j *{{$svrType}}SvcTask) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) (*asynq.Task, error) {
-	payload, err := proto.Marshal(in)
+	payload, err := {{ .PayloadType | getPayloadType}}.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
-{{if .TimeOut }}opts = append(opts, asynq.Timeout({{.TimeOut}}* time.Second)){{end}}
-{{if .MaxRetry }}opts = append(opts, asynq.MaxRetry({{.MaxRetry}})){{end}}
-{{if .Retention }}opts = append(opts, asynq.Timeout({{.Retention}}* time.Second)){{end}}
-{{if .Unique }}opts = append(opts, asynq.Unique({{.Unique}}* time.Second)){{end}}
+	{{- if .TimeOut }}
+	opts = append(opts, asynq.Timeout({{.TimeOut}}* time.Second))
+	{{- end}}
+	{{- if .MaxRetry }}
+	opts = append(opts, asynq.MaxRetry({{.MaxRetry}}))
+	{{- end}}
+	{{- if .Retention }}
+	opts = append(opts, asynq.Timeout({{.Retention}}* time.Second))
+	{{- end}}
+	{{- if .Unique }}
+	opts = append(opts, asynq.Unique({{.Unique}}* time.Second))
+	{{- end}}
 	opts = append(opts, asynq.Queue({{$svrType}}QueueName))
 	task := asynq.NewTask("{{.Typename}}", payload, opts...)
 		return task, nil
@@ -100,11 +110,12 @@ type methodDesc struct {
 	Request string
 	Reply   string
 	// asynq rule
-	Typename  string
-	TimeOut   int32
-	MaxRetry  int32
-	Retention int32
-	Unique    int32
+	Typename    *string
+	TimeOut     *int32
+	MaxRetry    *int32
+	Retention   *int32
+	Unique      *int32
+	PayloadType *asynq.Task_PayloadType
 }
 
 func (s *serviceDesc) execute() string {
@@ -115,6 +126,19 @@ func (s *serviceDesc) execute() string {
 	buf := new(bytes.Buffer)
 	tmpl, err := template.New("asynq").Funcs(map[string]interface{}{
 		"lower": strings.ToLower,
+		"getPayloadType": func(t *asynq.Task_PayloadType) string {
+			if t == nil {
+				return "proto"
+			}
+			switch t.String() {
+			case asynq.Task_Protobuf.String():
+				return "proto"
+			case asynq.Task_JSON.String():
+				return "json"
+			default:
+				return "proto"
+			}
+		},
 	}).Parse(strings.TrimSpace(asynqTemplate))
 	if err != nil {
 		panic(err)
