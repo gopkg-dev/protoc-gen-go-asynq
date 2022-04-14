@@ -6,13 +6,14 @@ import (
 	"text/template"
 
 	"github.com/amzapi/protoc-gen-go-asynq/asynq"
+	"github.com/huandu/xstrings"
 )
 
 var asynqTemplate = `
 {{$svrType := .ServiceType}}
 {{$svrName := .ServiceName}}
 
-const {{.ServiceType}}QueueName = "{{lower $svrType}}"
+const {{.ServiceType}}QueueName = "{{snakecase $svrType}}"
 
 type {{.ServiceType}}TaskServer interface {
 {{- range .MethodSets}}
@@ -125,7 +126,8 @@ func (s *serviceDesc) execute() string {
 	}
 	buf := new(bytes.Buffer)
 	tmpl, err := template.New("asynq").Funcs(map[string]interface{}{
-		"lower": strings.ToLower,
+		"lower":     strings.ToLower,
+		"snakecase": xstrings.ToSnakeCase,
 		"getPayloadType": func(t *asynq.Task_PayloadType) string {
 			if t == nil {
 				return "proto"
