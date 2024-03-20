@@ -56,7 +56,7 @@ func (j *{{$svrType}}SvcTask) {{.Name}}(in *{{.Request}}, opts ...asynq.Option) 
 	opts = append(opts, asynq.MaxRetry({{.MaxRetry}}))
 	{{- end}}
 	{{- if .Retention }}
-	opts = append(opts, asynq.Timeout({{.Retention}}* time.Second))
+	opts = append(opts, asynq.Retention({{.Retention}}* time.Second))
 	{{- end}}
 	{{- if .Unique }}
 	opts = append(opts, asynq.Unique({{.Unique}}* time.Second))
