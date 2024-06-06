@@ -67,7 +67,7 @@ func (j *UserSvcTask) CreateUser(in *CreateUserPayload, opts ...asynq.Option) (*
 	}
 	opts = append(opts, asynq.Timeout(30*time.Second))
 	opts = append(opts, asynq.MaxRetry(10))
-	opts = append(opts, asynq.Timeout(60*time.Second))
+	opts = append(opts, asynq.Retention(60*time.Second))
 	opts = append(opts, asynq.Unique(3600*time.Second))
 	opts = append(opts, asynq.Queue(UserQueueName))
 	task := asynq.NewTask("user:create", payload, opts...)
@@ -81,7 +81,7 @@ func (j *UserSvcTask) UpdateUser(in *UpdateUserPayload, opts ...asynq.Option) (*
 	}
 	opts = append(opts, asynq.Timeout(60*time.Second))
 	opts = append(opts, asynq.MaxRetry(10))
-	opts = append(opts, asynq.Timeout(60*time.Second))
+	opts = append(opts, asynq.Retention(60*time.Second))
 	opts = append(opts, asynq.Unique(3600*time.Second))
 	opts = append(opts, asynq.Queue(UserQueueName))
 	task := asynq.NewTask("user:update", payload, opts...)
@@ -168,7 +168,7 @@ func (j *BookSvcTask) CreateBook(in *CreateBookPayload, opts ...asynq.Option) (*
 	}
 	opts = append(opts, asynq.Timeout(30*time.Second))
 	opts = append(opts, asynq.MaxRetry(10))
-	opts = append(opts, asynq.Timeout(60*time.Second))
+	opts = append(opts, asynq.Retention(60*time.Second))
 	opts = append(opts, asynq.Unique(3600*time.Second))
 	opts = append(opts, asynq.Queue(BookQueueName))
 	task := asynq.NewTask("book:create", payload, opts...)
@@ -182,7 +182,7 @@ func (j *BookSvcTask) UpdateBook(in *UpdateBookPayload, opts ...asynq.Option) (*
 	}
 	opts = append(opts, asynq.Timeout(60*time.Second))
 	opts = append(opts, asynq.MaxRetry(10))
-	opts = append(opts, asynq.Timeout(60*time.Second))
+	opts = append(opts, asynq.Retention(60*time.Second))
 	opts = append(opts, asynq.Unique(3600*time.Second))
 	opts = append(opts, asynq.Queue(BookQueueName))
 	task := asynq.NewTask("book:update", payload, opts...)
