@@ -42,8 +42,7 @@ func _User_CreateUser_Task_Handler(srv UserTaskServer) func(context.Context, *as
 		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.CreateUser(ctx, &in)
-		return err
+		return srv.CreateUser(ctx, &in)
 	}
 }
 
@@ -53,8 +52,7 @@ func _User_UpdateUser_Task_Handler(srv UserTaskServer) func(context.Context, *as
 		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.UpdateUser(ctx, &in)
-		return err
+		return srv.UpdateUser(ctx, &in)
 	}
 }
 
@@ -145,8 +143,7 @@ func _Book_CreateBook_Task_Handler(srv BookTaskServer) func(context.Context, *as
 		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.CreateBook(ctx, &in)
-		return err
+		return srv.CreateBook(ctx, &in)
 	}
 }
 
@@ -156,8 +153,7 @@ func _Book_UpdateBook_Task_Handler(srv BookTaskServer) func(context.Context, *as
 		if err := json.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.UpdateBook(ctx, &in)
-		return err
+		return srv.UpdateBook(ctx, &in)
 	}
 }
 

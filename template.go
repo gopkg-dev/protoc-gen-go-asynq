@@ -34,8 +34,7 @@ func _{{$svrType}}_{{.Name}}_Task_Handler(srv {{$svrType}}TaskServer) func(conte
 		if err := {{ .PayloadType | getPayloadType}}.Unmarshal(task.Payload(), &in); err != nil {
 			return err
 		}
-		err := srv.{{.Name}}(ctx, &in)
-		return err
+		return srv.{{.Name}}(ctx, &in)
 	}
 }
 {{end}}
