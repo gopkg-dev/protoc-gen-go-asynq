@@ -84,6 +84,7 @@ func (e *RateLimitError) Error() string {
 }
 
 func IsRateLimitError(err error) bool {
-	_, ok := err.(*RateLimitError)
+	var rateLimitError *RateLimitError
+	ok := errors.As(err, &rateLimitError)
 	return ok
 }
