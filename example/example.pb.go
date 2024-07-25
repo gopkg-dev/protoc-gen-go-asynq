@@ -7,7 +7,7 @@
 package example
 
 import (
-	_ "github.com/amzapi/protoc-gen-go-asynq/asynq"
+	_ "github.com/gopkg-dev/protoc-gen-go-asynq/asynq"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"

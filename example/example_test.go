@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/amzapi/protoc-gen-go-asynq/asynqx"
+	"github.com/gopkg-dev/protoc-gen-go-asynq/asynqx"
 	"github.com/hibiken/asynq"
 )
 

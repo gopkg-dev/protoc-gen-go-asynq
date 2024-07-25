@@ -1,4 +1,4 @@
-module github.com/amzapi/protoc-gen-go-asynq
+module github.com/gopkg-dev/protoc-gen-go-asynq
 
 go 1.17
 

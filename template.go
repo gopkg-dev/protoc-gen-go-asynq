@@ -5,7 +5,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/amzapi/protoc-gen-go-asynq/asynq"
+	"github.com/gopkg-dev/protoc-gen-go-asynq/asynq"
 	"github.com/huandu/xstrings"
 )
 

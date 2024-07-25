@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/amzapi/protoc-gen-go-asynq/asynq"
+	"github.com/gopkg-dev/protoc-gen-go-asynq/asynq"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 	contextPackage = protogen.GoImportPath("context")
 	jsonPackage    = protogen.GoImportPath("encoding/json")
 	asynqPackage   = protogen.GoImportPath("github.com/hibiken/asynq")
-	asynqxPackage  = protogen.GoImportPath("github.com/amzapi/protoc-gen-go-asynq/asynqx")
+	asynqxPackage  = protogen.GoImportPath("github.com/gopkg-dev/protoc-gen-go-asynq/asynqx")
 	emptyPackage   = protogen.GoImportPath("google.golang.org/protobuf/types/known/emptypb")
 	protoPackage   = protogen.GoImportPath("google.golang.org/protobuf/proto")
 )

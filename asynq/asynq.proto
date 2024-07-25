@@ -4,7 +4,7 @@ package asynq;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package          = "github.com/amzapi/protoc-gen-go-asynq/asynq;asynq";
+option go_package          = "github.com/gopkg-dev/protoc-gen-go-asynq/asynq;asynq";
 option java_multiple_files = true;
 option java_package        = "com.github.asynq";
 
